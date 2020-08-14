@@ -25,5 +25,8 @@ setuptools.setup(
     ],
     python_requires=">=3.6",
     install_requires=["numpy>=1.18,<2"],
-    extras_requires={"opencv": ["opencv-python>=4.3.0,<5"]},
+    extras_requires={
+        "opencv": ["opencv-python>=4.3.0,<5", "pickle5>=0.0.11,<0.0.1"],
+        "ray": ["ray>=0.8.6,<0.9"],
+    },
 )
