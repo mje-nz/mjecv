@@ -16,7 +16,10 @@ class RayImageSequenceWriter(ImageSequenceWriter):
     def __init__(self, *args, num_cpus=None, max_waiting=None, **kwargs):
         super().__init__(*args, **kwargs)
         if not ray.is_initialized():
-            ray.init(num_cpus=num_cpus)
+            # By default ray reserves 30% of available memory for the object store, but
+            # image writer tasks hardly need any, so use more.
+            mem = ray.utils.estimate_available_memory()*0.7
+            ray.init(num_cpus=num_cpus, object_store_memory=mem)
         self._max_waiting = max_waiting
         self._waiting = []  # type: List[ray.ObjectID]
 
