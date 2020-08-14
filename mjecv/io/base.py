@@ -72,7 +72,7 @@ class MultiprocessingImageSequenceWriter(ImageSequenceWriter):
 
         else:
             callback = None  # type: ignore
-        args = (self._writer, filename, image)
+        args = (self._writer, (filename, image))
         if dill_for_apply:
             # Use dill instead of pickle, and make sure writer returns the filename
             _writer = self._writer  # Exclude self from capture to avoid dilling _pool
