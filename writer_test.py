@@ -1,11 +1,10 @@
 import numpy as np
 
-from mjecv.io import MultiprocessingImageSequenceWriter  # noqa: F401
-from mjecv.io import RayImageSequenceWriter, imwrite
+from mjecv.io import imwrite, ParallelImageSequenceWriter
 
 if __name__ == "__main__":
     size = 2000
-    Writer = RayImageSequenceWriter
+    Writer = ParallelImageSequenceWriter
     max_waiting = None
 
     im = np.random.random((size, size))

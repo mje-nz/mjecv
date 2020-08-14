@@ -5,6 +5,22 @@ import ray
 
 from .base import ImageSequenceWriter
 
+__all__ = ["RayImageSequenceWriter"]
+
+
+def check_versions():
+    """Check Python and/or Ray are new enough to avoid ray#7605
+
+    https://github.com/ray-project/ray/issues/7605
+    """
+    import sys
+    from packaging.version import parse
+    old_python =  sys.version_info <= (3, 6)
+    old_ray = parse(ray.__version__) <= parse("0.8.6")
+    if old_python and old_ray:
+        raise ImportError("Ray 0.8.6 doesn't work on py35")
+check_versions()
+
 
 @ray.remote(num_cpus=1)
 def _ray_save(writer, filename: str, image: np.ndarray):
