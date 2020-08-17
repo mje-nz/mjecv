@@ -1,4 +1,5 @@
 import enum
+from typing import Optional
 
 import numpy as np
 import yaml
@@ -90,4 +91,61 @@ class CameraIntrinsics:
         width, height = cam["resolution"]
         return cls(
             model, intrinsics, distortion_model, distortion_coeffs, width, height
+        )
+
+
+class CalibrationTargetType(enum.Enum):
+    AprilGrid = "aprilgrid"
+    Checkerboard = "checkerboard"
+    CircleGrid = "circlegrid"
+
+
+@attrs(auto_attribs=True)
+class CalibrationTarget:
+    type_: CalibrationTargetType
+    # Number of tags/internal corners/circles down/across
+    rows: int
+    cols: int
+    # AprilGrid only: size of each tag in metres
+    size: Optional[float] = None
+    # Aprilgrid: spacing between tags as a ratio of size
+    # CircleGrid: spacing between circles in metres
+    spacing: Optional[float] = None
+    # Checkerboard: height/width of each square in metres
+    row_spacing: Optional[float] = None
+    col_spacing: Optional[float] = None
+    # CircleGrid: Use asymmetric grid
+    asymmetric_grid: Optional[bool] = None
+
+    @classmethod
+    def from_kalibr_yaml(cls, file):
+        """Load calibration target configuration from a Kalibr target yaml file.
+
+        Args:
+            file: Filename or string of yaml file to load.
+        """
+        target = yaml.load(file, Loader=yaml.SafeLoader)
+
+        type_ = CalibrationTargetType(target["target_type"])
+
+        if "tagRows" in target:
+            rows = target["tagRows"]
+        elif "targetRows" in target:
+            rows = target["targetRows"]
+        else:
+            raise ValueError("Target rows not specified")
+        if "tagCols" in target:
+            cols = target["tagCols"]
+        elif "targetCols" in target:
+            cols = target["targetCols"]
+        else:
+            raise ValueError("Target columns not specified")
+
+        size = target.get("tagSize", None)
+        spacing = target.get("tagSpacing", target.get("spacingMeters", None))
+        row_spacing = target.get("rowSpacingMeters", None)
+        col_spacing = target.get("colSpacingMeters", None)
+        asymmetric_grid = target.get("asymmetricGrid", None)
+        return cls(
+            type_, rows, cols, size, spacing, row_spacing, col_spacing, asymmetric_grid
         )

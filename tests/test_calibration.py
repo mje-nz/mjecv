@@ -1,7 +1,15 @@
+import textwrap
+
 import numpy as np
 import pytest
 
-from mjecv.calibration import CameraIntrinsics, CameraModel, DistortionModel
+from mjecv.calibration import (
+    CalibrationTarget,
+    CalibrationTargetType,
+    CameraIntrinsics,
+    CameraModel,
+    DistortionModel,
+)
 
 # Example from https://github.com/ethz-asl/kalibr/wiki/yaml-formats
 camchain = """\
@@ -75,3 +83,56 @@ def test_camera_intrinsics_omni():
     )
     assert cam.width == 752
     assert cam.height == 480
+
+
+def test_target_aprilgrid():
+    target_yaml = textwrap.dedent(
+        """\
+        target_type: 'aprilgrid'
+        tagCols: 6
+        tagRows: 6
+        tagSize: 0.088
+        tagSpacing: 0.3
+    """
+    )
+    target = CalibrationTarget.from_kalibr_yaml(target_yaml)
+    assert target.type_ == CalibrationTargetType.AprilGrid
+    assert target.cols == target.rows == 6
+    assert np.isclose(target.size, 0.088)
+    assert np.isclose(target.spacing, 0.3)
+
+
+def test_target_checkerboard():
+    target_yaml = textwrap.dedent(
+        """\
+        target_type: 'checkerboard'
+        targetCols: 6
+        targetRows: 7
+        rowSpacingMeters: 0.06
+        colSpacingMeters: 0.06
+    """
+    )
+    target = CalibrationTarget.from_kalibr_yaml(target_yaml)
+    assert target.type_ == CalibrationTargetType.Checkerboard
+    assert target.cols == 6
+    assert target.rows == 7
+    assert np.isclose(target.row_spacing, 0.06)
+    assert np.isclose(target.col_spacing, 0.06)
+
+
+def test_target_circlegrid():
+    target_yaml = textwrap.dedent(
+        """\
+        target_type: 'circlegrid'
+        targetCols: 6
+        targetRows: 7
+        spacingMeters: 0.02
+        asymmetricGrid: False
+    """
+    )
+    target = CalibrationTarget.from_kalibr_yaml(target_yaml)
+    assert target.type_ == CalibrationTargetType.CircleGrid
+    assert target.cols == 6
+    assert target.rows == 7
+    assert np.isclose(target.spacing, 0.02)
+    assert target.asymmetric_grid is False
