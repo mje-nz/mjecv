@@ -56,9 +56,25 @@ class CameraIntrinsics:
     width: float = attrib()
     height: float = attrib()
 
+    @property
+    def intrinsic_matrix(self):
+        if self.model != CameraModel.Pinhole:
+            raise NotImplementedError("Intrinsic only supported for pinhole model")
+        fx, fy, px, py = self.intrinsics
+        return np.array(((fx, 0, px), (0, fy, py), (0, 0, 1)))
+
     @classmethod
-    def from_kalibr_camchain(cls, filename, camera_name=None):
-        camchain = yaml.load(open(filename), Loader=yaml.SafeLoader)
+    def from_kalibr_camchain(cls, file, camera_name: str = None):
+        """Load camera intrinsics from a Kalibr camchain yaml file.
+
+        Args:
+            file: Filename or file object of yaml file to load.
+            camera_name: Name of camera to load intrinsics for (optional if only one).
+        """
+        if ":" not in file:
+            # File is a filename
+            file = open(file)
+        camchain = yaml.load(file, Loader=yaml.SafeLoader)
         assert len(camchain) >= 1
         if not camera_name:
             if len(camchain) > 1:
