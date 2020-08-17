@@ -52,18 +52,18 @@ def _check_pinhole(cam):
 
 
 def test_camera_intrinsics_pinhole():
-    cam = CameraIntrinsics.from_kalibr_camchain(camchain, "cam0")
+    cam = CameraIntrinsics.from_kalibr_yaml(camchain, "cam0")
     _check_pinhole(cam)
 
 
 def test_camera_intrinsics_only():
     camchain_first = "\n".join(camchain.splitlines()[:13])
-    cam = CameraIntrinsics.from_kalibr_camchain(camchain_first)
+    cam = CameraIntrinsics.from_kalibr_yaml(camchain_first)
     _check_pinhole(cam)
 
 
 def test_camera_intrinsics_omni():
-    cam = CameraIntrinsics.from_kalibr_camchain(camchain, "cam1")
+    cam = CameraIntrinsics.from_kalibr_yaml(camchain, "cam1")
 
     assert cam.model == CameraModel.Omni
     assert np.allclose(cam.intrinsics, [0.80065662, 833.006, 830.345, 373.850, 253.749])

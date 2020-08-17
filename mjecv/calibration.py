@@ -2,7 +2,7 @@ import enum
 
 import numpy as np
 import yaml
-from attr import attrib, attrs
+from attr import attrs
 
 # The pinhole camera model in OpenCV uses the intrinsic matrix
 #   [f_x  0    c_x]
@@ -47,14 +47,14 @@ class DistortionModel(enum.Enum):
         raise ValueError(f"Invalid {cls.__name__}: {name}")
 
 
-@attrs
+@attrs(auto_attribs=True)
 class CameraIntrinsics:
-    model: CameraModel = attrib()
-    intrinsics: np.ndarray = attrib()
-    distortion_model: DistortionModel = attrib()
-    distortion_coeffs: np.ndarray = attrib()
-    width: float = attrib()
-    height: float = attrib()
+    model: CameraModel
+    intrinsics: np.ndarray
+    distortion_model: DistortionModel
+    distortion_coeffs: np.ndarray
+    width: float
+    height: float
 
     @property
     def intrinsic_matrix(self):
@@ -64,11 +64,11 @@ class CameraIntrinsics:
         return np.array(((fx, 0, px), (0, fy, py), (0, 0, 1)))
 
     @classmethod
-    def from_kalibr_camchain(cls, file, camera_name: str = None):
+    def from_kalibr_yaml(cls, file, camera_name: str = None):
         """Load camera intrinsics from a Kalibr camchain yaml file.
 
         Args:
-            file: Filename or file object of yaml file to load.
+            file: Filename or string of yaml file to load.
             camera_name: Name of camera to load intrinsics for (optional if only one).
         """
         if ":" not in file:
