@@ -1,6 +1,7 @@
 try:
-    from .opencv import imwrite
+    from .opencv import imread, imwrite
 except ImportError:
+    imread = None  # type: ignore
     imwrite = None  # type: ignore
 
 from .base import ImageSequenceWriter, MultiprocessingImageSequenceWriter
@@ -9,7 +10,8 @@ ParallelImageSequenceWriter = MultiprocessingImageSequenceWriter
 
 try:
     from .ray import RayImageSequenceWriter
-    ParallelImageSequenceWriter = RayImageSequenceWriter
+
+    ParallelImageSequenceWriter = RayImageSequenceWriter  # type: ignore
 except ImportError:
     RayImageSequenceWriter = None  # type: ignore
 
