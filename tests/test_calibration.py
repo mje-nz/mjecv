@@ -4,10 +4,13 @@ import numpy as np
 import pytest
 
 from mjecv.calibration import (
+    AprilGridTarget,
     CalibrationTarget,
     CalibrationTargetType,
     CameraIntrinsics,
     CameraModel,
+    CheckerboardTarget,
+    CircleGridTarget,
     DistortionModel,
 )
 
@@ -90,14 +93,15 @@ def test_target_aprilgrid():
         """\
         target_type: 'aprilgrid'
         tagCols: 6
-        tagRows: 6
+        tagRows: 7
         tagSize: 0.088
         tagSpacing: 0.3
     """
     )
     target = CalibrationTarget.from_kalibr_yaml(target_yaml)
     assert target.type_ == CalibrationTargetType.AprilGrid
-    assert target.cols == target.rows == 6
+    assert target.cols == 6
+    assert target.rows == 7
     assert np.isclose(target.size, 0.088)
     assert np.isclose(target.spacing, 0.3)
 
@@ -132,6 +136,38 @@ def test_target_circlegrid():
     )
     target = CalibrationTarget.from_kalibr_yaml(target_yaml)
     assert target.type_ == CalibrationTargetType.CircleGrid
+    assert target.cols == 6
+    assert target.rows == 7
+    assert np.isclose(target.spacing, 0.02)
+    assert target.asymmetric_grid is False
+
+
+def test_target_create_aprilgrid():
+    target = AprilGridTarget((7, 6), 0.088, 0.3)
+    assert target.cols == 6
+    assert target.rows == 7
+    assert np.isclose(target.size, 0.088)
+    assert np.isclose(target.spacing, 0.3)
+
+
+def test_target_create_checkerboard_square():
+    target = CheckerboardTarget((7, 6), 0.06)
+    assert target.cols == 6
+    assert target.rows == 7
+    assert np.isclose(target.row_spacing, 0.06)
+    assert np.isclose(target.col_spacing, 0.06)
+
+
+def test_target_create_checkerboard_rect():
+    target = CheckerboardTarget((7, 6), 0.06, 0.07)
+    assert target.cols == 6
+    assert target.rows == 7
+    assert np.isclose(target.row_spacing, 0.06)
+    assert np.isclose(target.col_spacing, 0.07)
+
+
+def test_target_create_circlegrid():
+    target = CircleGridTarget((7, 6), 0.02, False)
     assert target.cols == 6
     assert target.rows == 7
     assert np.isclose(target.spacing, 0.02)

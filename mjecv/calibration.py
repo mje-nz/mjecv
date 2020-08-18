@@ -1,5 +1,5 @@
 import enum
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 import yaml
@@ -102,20 +102,29 @@ class CalibrationTargetType(enum.Enum):
 
 @attrs(auto_attribs=True)
 class CalibrationTarget:
+
+    """Base class for calibration target configurations."""
+
     type_: CalibrationTargetType
     # Number of tags/internal corners/circles down/across
     rows: int
     cols: int
     # AprilGrid only: size of each tag in metres
     size: Optional[float] = None
-    # Aprilgrid: spacing between tags as a ratio of size
-    # CircleGrid: spacing between circles in metres
+    # Aprilgrid: distance between tags as a fraction of size
+    # CircleGrid: distance between circles in metres
     spacing: Optional[float] = None
     # Checkerboard: height/width of each square in metres
     row_spacing: Optional[float] = None
     col_spacing: Optional[float] = None
     # CircleGrid: Use asymmetric grid
     asymmetric_grid: Optional[bool] = None
+
+    _types = {}  # type: Dict[CalibrationTargetType, Any]
+
+    def __init_subclass__(cls, type_: CalibrationTargetType):
+        """Register subclasses when they're declared."""
+        cls._types[type_] = cls
 
     @classmethod
     def from_kalibr_yaml(cls, file):
@@ -124,28 +133,83 @@ class CalibrationTarget:
         Args:
             file: Filename or string of yaml file to load.
         """
-        target = yaml.load(file, Loader=yaml.SafeLoader)
+        target_yaml = yaml.load(file, Loader=yaml.SafeLoader)
+        target_type = CalibrationTargetType(target_yaml["target_type"])
+        return cls._types[target_type]._from_kalibr_yaml(target_yaml)
 
-        type_ = CalibrationTargetType(target["target_type"])
 
-        if "tagRows" in target:
-            rows = target["tagRows"]
-        elif "targetRows" in target:
-            rows = target["targetRows"]
-        else:
-            raise ValueError("Target rows not specified")
-        if "tagCols" in target:
-            cols = target["tagCols"]
-        elif "targetCols" in target:
-            cols = target["targetCols"]
-        else:
-            raise ValueError("Target columns not specified")
+class AprilGridTarget(CalibrationTarget, type_=CalibrationTargetType.AprilGrid):
+    def __init__(self, shape: Tuple[int, int], size: float, spacing=0.3):
+        """Construct an AprilGrid calibration target.
 
-        size = target.get("tagSize", None)
-        spacing = target.get("tagSpacing", target.get("spacingMeters", None))
-        row_spacing = target.get("rowSpacingMeters", None)
-        col_spacing = target.get("colSpacingMeters", None)
-        asymmetric_grid = target.get("asymmetricGrid", None)
-        return cls(
-            type_, rows, cols, size, spacing, row_spacing, col_spacing, asymmetric_grid
+        Args:
+            shape: Number of tags (down, across).
+            size: Size of each tag in metres.
+            spacing: Distance between tags as a ratio of size.
+        """
+        rows, cols = shape
+        super().__init__(CalibrationTargetType.AprilGrid, rows, cols, size, spacing)
+
+    @classmethod
+    def _from_kalibr_yaml(cls, target_yaml):
+        rows = int(target_yaml["tagRows"])
+        cols = int(target_yaml["tagCols"])
+        size = float(target_yaml["tagSize"])
+        spacing = float(target_yaml["tagSpacing"])
+        return cls((rows, cols), size, spacing)
+
+
+class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerboard):
+    def __init__(self, shape, size_or_square_height: float, square_width=None):
+        """Construct a checkerboard calibration target.
+
+        Args:
+            shape (Tuple[int, int]): Number of internal corners (down, across).
+            size_or_square_height: Square size in metres, or square height if
+                `square_width` given.
+            square_height (Optional[float]): Square height in metres.
+        """
+        rows, cols = shape
+        if not square_width:
+            square_width = size_or_square_height
+        super().__init__(
+            CalibrationTargetType.Checkerboard,
+            rows,
+            cols,
+            row_spacing=size_or_square_height,
+            col_spacing=square_width,
         )
+
+    @classmethod
+    def _from_kalibr_yaml(cls, target_yaml):
+        rows = int(target_yaml["targetRows"])
+        cols = int(target_yaml["targetCols"])
+        row_spacing = float(target_yaml["rowSpacingMeters"])
+        col_spacing = float(target_yaml["colSpacingMeters"])
+        return cls((rows, cols), row_spacing, col_spacing)
+
+
+class CircleGridTarget(CalibrationTarget, type_=CalibrationTargetType.CircleGrid):
+    def __init__(self, shape: Tuple[int, int], spacing: float, asymmetric_grid: bool):
+        """Construct a circle grid calibration target.
+
+        Args:
+            shape: Number of circles (down, across).
+            asymmetric_grid: Use asymmetric grid.
+        """
+        rows, cols = shape
+        super().__init__(
+            CalibrationTargetType.CircleGrid,
+            rows,
+            cols,
+            spacing=spacing,
+            asymmetric_grid=asymmetric_grid,
+        )
+
+    @classmethod
+    def _from_kalibr_yaml(cls, target_yaml):
+        rows = int(target_yaml["targetRows"])
+        cols = int(target_yaml["targetCols"])
+        spacing = float(target_yaml["spacingMeters"])
+        asymmetric_grid = target_yaml["asymmetricGrid"]
+        return cls((rows, cols), spacing, asymmetric_grid)
