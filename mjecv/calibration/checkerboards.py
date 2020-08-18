@@ -57,6 +57,9 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
             col_spacing=square_width,
         )
 
+    def detect(self, image: np.ndarray, refine=True):
+        return find_checkerboard_corners(image, self.shape, refine)
+
     @classmethod
     def _from_kalibr_yaml(cls, target_yaml):
         rows = int(target_yaml["targetRows"])

@@ -49,7 +49,7 @@ class CalibrationTarget:
     def shape(self):
         return self.cols, self.rows
 
-    def detect(self, image: np.ndarray, *args, **kwargs):
+    def detect(self, image: np.ndarray, refine=True):
         """Detect the target in an image.
 
         Returns:
