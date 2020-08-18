@@ -9,7 +9,6 @@ __all__ = [
     "AprilGridTarget",
     "CalibrationTarget",
     "CalibrationTargetType",
-    "CheckerboardTarget",
     "CircleGridTarget",
 ]
 
@@ -90,36 +89,6 @@ class AprilGridTarget(CalibrationTarget, type_=CalibrationTargetType.AprilGrid):
         size = float(target_yaml["tagSize"])
         spacing = float(target_yaml["tagSpacing"])
         return cls((cols, rows), size, spacing)
-
-
-class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerboard):
-    def __init__(self, shape, size_or_square_height: float, square_width=None):
-        """Construct a checkerboard calibration target.
-
-        Args:
-            shape (Tuple[int, int]): Number of internal corners (per row, per column).
-            size_or_square_height: Square size in metres, or square height if
-                `square_width` given.
-            square_height (Optional[float]): Square height in metres.
-        """
-        cols, rows = shape
-        if not square_width:
-            square_width = size_or_square_height
-        super().__init__(
-            CalibrationTargetType.Checkerboard,
-            rows,
-            cols,
-            row_spacing=size_or_square_height,
-            col_spacing=square_width,
-        )
-
-    @classmethod
-    def _from_kalibr_yaml(cls, target_yaml):
-        rows = int(target_yaml["targetRows"])
-        cols = int(target_yaml["targetCols"])
-        row_spacing = float(target_yaml["rowSpacingMeters"])
-        col_spacing = float(target_yaml["colSpacingMeters"])
-        return cls((cols, rows), row_spacing, col_spacing)
 
 
 class CircleGridTarget(CalibrationTarget, type_=CalibrationTargetType.CircleGrid):
