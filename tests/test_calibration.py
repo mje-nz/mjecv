@@ -144,31 +144,31 @@ def test_target_circlegrid():
 
 def test_target_create_aprilgrid():
     target = AprilGridTarget((7, 6), 0.088, 0.3)
-    assert target.cols == 6
-    assert target.rows == 7
+    assert target.cols == 7
+    assert target.rows == 6
     assert np.isclose(target.size, 0.088)
     assert np.isclose(target.spacing, 0.3)
 
 
 def test_target_create_checkerboard_square():
     target = CheckerboardTarget((7, 6), 0.06)
-    assert target.cols == 6
-    assert target.rows == 7
+    assert target.cols == 7
+    assert target.rows == 6
     assert np.isclose(target.row_spacing, 0.06)
     assert np.isclose(target.col_spacing, 0.06)
 
 
 def test_target_create_checkerboard_rect():
     target = CheckerboardTarget((7, 6), 0.06, 0.07)
-    assert target.cols == 6
-    assert target.rows == 7
+    assert target.cols == 7
+    assert target.rows == 6
     assert np.isclose(target.row_spacing, 0.06)
     assert np.isclose(target.col_spacing, 0.07)
 
 
 def test_target_create_circlegrid():
     target = CircleGridTarget((7, 6), 0.02, False)
-    assert target.cols == 6
-    assert target.rows == 7
+    assert target.cols == 7
+    assert target.rows == 6
     assert np.isclose(target.spacing, 0.02)
     assert target.asymmetric_grid is False

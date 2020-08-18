@@ -126,6 +126,19 @@ class CalibrationTarget:
         """Register subclasses when they're declared."""
         cls._types[type_] = cls
 
+    @property
+    def shape(self):
+        return self.cols, self.rows
+
+    def detect(self, image: np.ndarray, *args, **kwargs):
+        """Detect the target in an image.
+
+        Returns:
+            np.ndarray: Nx2 list of image points (tag corners/internal corners/centers),
+            or None if not found.
+        """
+        raise NotImplementedError()
+
     @classmethod
     def from_kalibr_yaml(cls, file):
         """Load calibration target configuration from a Kalibr target yaml file.
@@ -143,11 +156,11 @@ class AprilGridTarget(CalibrationTarget, type_=CalibrationTargetType.AprilGrid):
         """Construct an AprilGrid calibration target.
 
         Args:
-            shape: Number of tags (down, across).
+            shape: Number of tags (per row, per column).
             size: Size of each tag in metres.
             spacing: Distance between tags as a ratio of size.
         """
-        rows, cols = shape
+        cols, rows = shape
         super().__init__(CalibrationTargetType.AprilGrid, rows, cols, size, spacing)
 
     @classmethod
@@ -156,7 +169,7 @@ class AprilGridTarget(CalibrationTarget, type_=CalibrationTargetType.AprilGrid):
         cols = int(target_yaml["tagCols"])
         size = float(target_yaml["tagSize"])
         spacing = float(target_yaml["tagSpacing"])
-        return cls((rows, cols), size, spacing)
+        return cls((cols, rows), size, spacing)
 
 
 class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerboard):
@@ -164,12 +177,12 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
         """Construct a checkerboard calibration target.
 
         Args:
-            shape (Tuple[int, int]): Number of internal corners (down, across).
+            shape (Tuple[int, int]): Number of internal corners (per row, per column).
             size_or_square_height: Square size in metres, or square height if
                 `square_width` given.
             square_height (Optional[float]): Square height in metres.
         """
-        rows, cols = shape
+        cols, rows = shape
         if not square_width:
             square_width = size_or_square_height
         super().__init__(
@@ -186,7 +199,7 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
         cols = int(target_yaml["targetCols"])
         row_spacing = float(target_yaml["rowSpacingMeters"])
         col_spacing = float(target_yaml["colSpacingMeters"])
-        return cls((rows, cols), row_spacing, col_spacing)
+        return cls((cols, rows), row_spacing, col_spacing)
 
 
 class CircleGridTarget(CalibrationTarget, type_=CalibrationTargetType.CircleGrid):
@@ -194,10 +207,10 @@ class CircleGridTarget(CalibrationTarget, type_=CalibrationTargetType.CircleGrid
         """Construct a circle grid calibration target.
 
         Args:
-            shape: Number of circles (down, across).
+            shape: Number of circles (per row, per column).
             asymmetric_grid: Use asymmetric grid.
         """
-        rows, cols = shape
+        cols, rows = shape
         super().__init__(
             CalibrationTargetType.CircleGrid,
             rows,
@@ -212,4 +225,4 @@ class CircleGridTarget(CalibrationTarget, type_=CalibrationTargetType.CircleGrid
         cols = int(target_yaml["targetCols"])
         spacing = float(target_yaml["spacingMeters"])
         asymmetric_grid = target_yaml["asymmetricGrid"]
-        return cls((rows, cols), spacing, asymmetric_grid)
+        return cls((cols, rows), spacing, asymmetric_grid)
