@@ -49,9 +49,9 @@ class DistortionModel(enum.Enum):
 
     @classmethod
     def from_name(cls, name):
-        for v in cls:
-            if v.name.lower() == name.strip("-"):
-                return v
+        for member_name, member in cls.__members__.items():
+            if member_name.lower() == name.replace("-", ""):
+                return member
         raise ValueError(f"Invalid {cls.__name__}: {name}")
 
 

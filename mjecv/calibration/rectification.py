@@ -12,7 +12,7 @@ __all__ = [
     "InterpolationMethod",
     "OpenCvUndistorter",
     "PinholeNoneIntrinsics",
-    "PinholeRadtanIntrinsics",
+    "PinholeRadTanIntrinsics",
 ]
 
 
@@ -91,6 +91,9 @@ class OpenCvUndistorter:
         self.new_intrinsic_matrix[:2, :2] *= self.zoom
         self._maps = self._calculate_maps()
 
+    def _get_optimal_camera_matrix(self, alpha):
+        raise NotImplementedError()
+
     def _calculate_new_intrinsic_matrix(self):
         if self.extent == ImageExtent.Original:
             return self.intrinsic_matrix
@@ -99,14 +102,31 @@ class OpenCvUndistorter:
                 alpha = 1
             else:
                 alpha = 0
-            new_intrinsic_matrix, _ = cv2.getOptimalNewCameraMatrix(
-                self.intrinsic_matrix,
-                self.distortion_coeffs,
-                (self.width, self.height),
-                alpha,
-                (self.new_width, self.new_height),
-            )
-            return new_intrinsic_matrix
+            return self._get_optimal_camera_matrix(alpha)
+
+    def _calculate_maps(self):
+        raise NotImplementedError()
+
+    def undistort_image(self, image: np.ndarray):
+        return cv2.remap(
+            image,
+            *self._maps,
+            interpolation=self.interpolation.value,
+            borderMode=cv2.BORDER_CONSTANT,
+            borderValue=self.invalid_colour
+        )
+
+
+class OpenCvUndistorterRadTan(OpenCvUndistorter):
+    def _get_optimal_camera_matrix(self, alpha):
+        new_intrinsic_matrix, _ = cv2.getOptimalNewCameraMatrix(
+            self.intrinsic_matrix,
+            self.distortion_coeffs,
+            (self.width, self.height),
+            alpha,
+            (self.new_width, self.new_height),
+        )
+        return new_intrinsic_matrix
 
     def _calculate_maps(self):
         return cv2.initUndistortRectifyMap(
@@ -118,13 +138,27 @@ class OpenCvUndistorter:
             cv2.CV_16SC2,
         )
 
-    def undistort_image(self, image: np.ndarray):
-        return cv2.remap(
-            image,
-            *self._maps,
-            interpolation=self.interpolation.value,
-            borderMode=cv2.BORDER_CONSTANT,
-            borderValue=self.invalid_colour
+
+class OpenCvUndistorterFisheye(OpenCvUndistorter):
+    def _get_optimal_camera_matrix(self, alpha):
+        new_intrinsic_matrix = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(
+            self.intrinsic_matrix,
+            self.distortion_coeffs,
+            (self.width, self.height),
+            np.eye(3),
+            balance=alpha,
+            new_size=(self.new_width, self.new_height),
+        )
+        return new_intrinsic_matrix
+
+    def _calculate_maps(self):
+        return cv2.fisheye.initUndistortRectifyMap(
+            self.intrinsic_matrix,
+            self.distortion_coeffs,
+            np.eye(3),
+            self.new_intrinsic_matrix,
+            (self.new_width, self.new_height),
+            cv2.CV_16SC2,
         )
 
 
@@ -141,7 +175,7 @@ class PinholeNoneIntrinsics(
         )
 
 
-class PinholeRadtanIntrinsics(
+class PinholeRadTanIntrinsics(
     CameraIntrinsics, model=CameraModel.Pinhole, distortion_model=DistortionModel.RadTan
 ):
     def __init__(
@@ -159,7 +193,37 @@ class PinholeRadtanIntrinsics(
         )
 
     def get_undistorter(self, *args, **kwargs):
-        return OpenCvUndistorter(
+        return OpenCvUndistorterRadTan(
+            self.intrinsic_matrix,
+            self.distortion_coeffs,
+            self.width,
+            self.height,
+            *args,
+            **kwargs
+        )
+
+
+class PinholeFisheyeIntrinsics(
+    CameraIntrinsics,
+    model=CameraModel.Pinhole,
+    distortion_model=DistortionModel.Fisheye,
+):
+    def __init__(
+        self, intrinsics, distortion_coeffs, width=None, height=None, shape=None
+    ):
+        if width is None:
+            height, width = shape[:2]
+        super().__init__(
+            CameraModel.Pinhole,
+            intrinsics,
+            DistortionModel.Fisheye,
+            distortion_coeffs,
+            width,
+            height,
+        )
+
+    def get_undistorter(self, *args, **kwargs):
+        return OpenCvUndistorterFisheye(
             self.intrinsic_matrix,
             self.distortion_coeffs,
             self.width,
