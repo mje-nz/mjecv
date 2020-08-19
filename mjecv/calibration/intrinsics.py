@@ -1,4 +1,5 @@
 import enum
+from typing import Any, Dict, Tuple
 
 import numpy as np
 import yaml
@@ -38,14 +39,18 @@ class CameraModel(enum.Enum):
 class DistortionModel(enum.Enum):
     None_ = "none"
     RadTan = "radtan"
+    RadialTangential = "radtan"
     Fisheye = "fisheye"
     Equi = "fisheye"
+    Equidistant = "fisheye"
     Fov = "fov"
+
+    # TODO: test "radial-tangential" and "equidistant", since they seem to be valid
 
     @classmethod
     def from_name(cls, name):
         for v in cls:
-            if v.name.lower() == name:
+            if v.name.lower() == name.strip("-"):
                 return v
         raise ValueError(f"Invalid {cls.__name__}: {name}")
 
@@ -56,8 +61,19 @@ class CameraIntrinsics:
     intrinsics: np.ndarray
     distortion_model: DistortionModel
     distortion_coeffs: np.ndarray
-    width: float
-    height: float
+    width: int
+    height: int
+
+    _derived = {}  # type: Dict[Tuple[CameraModel, DistortionModel], Any]
+
+    def __init_subclass__(cls, model=None, distortion_model=None):
+        """Register subclasses when they're declared."""
+        if model and distortion_model:
+            cls._derived[(model, distortion_model)] = cls
+
+    @property
+    def shape(self):
+        return self.height, self.width
 
     @property
     def intrinsic_matrix(self):
@@ -65,6 +81,9 @@ class CameraIntrinsics:
             raise NotImplementedError("Intrinsic only supported for pinhole model")
         fx, fy, px, py = self.intrinsics
         return np.array(((fx, 0, px), (0, fy, py), (0, 0, 1)))
+
+    def get_undistorter(self, *args, **kwargs):
+        raise NotImplementedError()
 
     @classmethod
     def from_kalibr_yaml(cls, file, camera_name: str = None):
@@ -91,6 +110,11 @@ class CameraIntrinsics:
         distortion_model = DistortionModel.from_name(cam["distortion_model"])
         distortion_coeffs = np.array(cam["distortion_coeffs"])
         width, height = cam["resolution"]
-        return cls(
-            model, intrinsics, distortion_model, distortion_coeffs, width, height
-        )
+        try:
+            return cls._derived[(model, distortion_model)](
+                intrinsics, distortion_coeffs, width, height
+            )
+        except KeyError:
+            return cls(
+                model, intrinsics, distortion_model, distortion_coeffs, width, height
+            )
