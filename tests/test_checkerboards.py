@@ -29,3 +29,16 @@ def test_CheckerboardTarget_detect():
 
     actual = target.detect(image)
     assert np.allclose(actual, expected, atol=0.1)
+
+
+def test_CheckerboardTarget_object_points():
+    target = CheckerboardTarget((3, 2), square_width=0.2, size_or_square_height=0.1)
+    expected = [
+        (-0.2, -0.05, 0),
+        (0, -0.05, 0),
+        (0.2, -0.05, 0),
+        (-0.2, 0.05, 0),
+        (0, 0.05, 0),
+        (0.2, 0.05, 0),
+    ]
+    assert np.allclose(target.object_points, expected)

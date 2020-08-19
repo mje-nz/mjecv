@@ -47,6 +47,7 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
             square_height (Optional[float]): Square height in metres.
         """
         cols, rows = shape
+        # TODO: flip order of height, width to match shape
         if not square_width:
             square_width = size_or_square_height
         super().__init__(
@@ -56,6 +57,27 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
             row_spacing=size_or_square_height,
             col_spacing=square_width,
         )
+
+    @property
+    def object_points(self):
+        """3D coordinates of internal corners, number along rows from top left.
+
+        Origin is at the center.
+        """
+        # Corners indexed as (row, col) from top left, number along rows first
+        corner_indices = np.moveaxis(np.mgrid[: self.rows, : self.cols], 0, 2)
+        corner_indices = corner_indices.reshape(-1, 2)
+        # Indexed by (x, y)
+        corner_indices = np.roll(corner_indices, 1, axis=1)
+        # Move origin to center
+        center = (np.array((self.cols, self.rows)) - 1) / 2
+        corner_coords = corner_indices - center
+        # Convert to metres
+        corner_coords[:, 0] *= self.col_spacing
+        corner_coords[:, 1] *= self.row_spacing
+        # Add z axis
+        corner_coords = np.c_[corner_coords, np.zeros(len(corner_coords))]
+        return corner_coords
 
     def detect(self, image: np.ndarray, refine=True):
         return find_checkerboard_corners(image, self.shape, refine)
