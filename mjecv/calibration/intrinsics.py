@@ -85,6 +85,9 @@ class CameraIntrinsics:
     def get_undistorter(self, *args, **kwargs):
         raise NotImplementedError()
 
+    def undistort_image(self, image: np.ndarray, *args, **kwargs):
+        return self.get_undistorter(*args, **kwargs).undistort_image(image)
+
     @classmethod
     def from_kalibr_yaml(cls, file, camera_name: str = None):
         """Load camera intrinsics from a Kalibr camchain yaml file.

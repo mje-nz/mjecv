@@ -102,6 +102,7 @@ class OpenCvUndistorter:
                 alpha = 1
             else:
                 alpha = 0
+            # TODO: support Centred extents
             return self._get_optimal_camera_matrix(alpha)
 
     def _calculate_maps(self):
