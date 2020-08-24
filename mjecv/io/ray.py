@@ -14,11 +14,15 @@ def check_versions():
     https://github.com/ray-project/ray/issues/7605
     """
     import sys
+
     from packaging.version import parse
-    old_python =  sys.version_info <= (3, 6)
+
+    old_python = sys.version_info <= (3, 6)
     old_ray = parse(ray.__version__) <= parse("0.8.6")
     if old_python and old_ray:
         raise ImportError("Ray 0.8.6 doesn't work on py35")
+
+
 check_versions()
 
 
@@ -34,7 +38,7 @@ class RayImageSequenceWriter(ImageSequenceWriter):
         if not ray.is_initialized():
             # By default ray reserves 30% of available memory for the object store, but
             # image writer tasks hardly need any, so use more.
-            mem = ray.utils.estimate_available_memory()*0.7
+            mem = ray.utils.estimate_available_memory() * 0.7
             ray.init(num_cpus=num_cpus, object_store_memory=mem)
         self._max_waiting = max_waiting
         self._waiting = []  # type: List[ray.ObjectID]
