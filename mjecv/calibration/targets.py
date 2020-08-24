@@ -5,6 +5,8 @@ import numpy as np
 import yaml
 from attr import attrs
 
+from .intrinsics import CameraIntrinsics
+
 __all__ = [
     "AprilGridTarget",
     "CalibrationTarget",
@@ -49,6 +51,10 @@ class CalibrationTarget:
     def shape(self):
         return self.cols, self.rows
 
+    @property
+    def object_points(self):
+        raise NotImplementedError()
+
     def detect(self, image: np.ndarray, refine=True):
         """Detect the target in an image.
 
@@ -58,8 +64,15 @@ class CalibrationTarget:
         """
         raise NotImplementedError()
 
+    def estimate_pose(self, corners, intrinsics: CameraIntrinsics):
+        """Estimate the target's pose.
+
+        Returns: rotation vector, (x, y, z) translation in metres
+        """
+        raise NotImplementedError()
+
     @classmethod
-    def from_kalibr_yaml(cls, file):
+    def from_kalibr_yaml(cls, file) -> "CalibrationTarget":
         """Load calibration target configuration from a Kalibr target yaml file.
 
         Args:

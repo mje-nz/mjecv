@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 
 from ..features import refine_subpixel
+from ..geometry import solve_pnp
+from .intrinsics import CameraIntrinsics
 from .targets import CalibrationTarget, CalibrationTargetType
 
 __all__ = ["CheckerboardTarget", "find_checkerboard_corners"]
@@ -81,6 +83,9 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
 
     def detect(self, image: np.ndarray, refine=True):
         return find_checkerboard_corners(image, self.shape, refine)
+
+    def estimate_pose(self, corners, intrinsics: CameraIntrinsics):
+        return solve_pnp(self.object_points, corners, intrinsics.intrinsic_matrix)
 
     @classmethod
     def _from_kalibr_yaml(cls, target_yaml):
