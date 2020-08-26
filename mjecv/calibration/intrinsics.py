@@ -80,7 +80,7 @@ class CameraIntrinsics:
         if self.model != CameraModel.Pinhole:
             raise NotImplementedError("Intrinsic only supported for pinhole model")
         fx, fy, px, py = self.intrinsics
-        return np.array(((fx, 0, px), (0, fy, py), (0, 0, 1)))
+        return np.array(((fx, 0, px), (0, fy, py), (0, 0, 1)), dtype=np.float64)
 
     def get_undistorter(self, *args, **kwargs):
         raise NotImplementedError()
