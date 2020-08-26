@@ -40,7 +40,8 @@ def draw_circle(
     """
     if fill:
         thickness = -1
-    assert thickness > 0
+    else:
+        assert thickness > 0
     validate_colour(image, colour)
 
     shift = 4
