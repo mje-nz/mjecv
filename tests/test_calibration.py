@@ -1,4 +1,5 @@
 import textwrap
+import warnings
 
 import numpy as np
 import pytest
@@ -122,6 +123,12 @@ def test_target_checkerboard():
     assert target.rows == 7
     assert np.isclose(target.row_spacing, 0.06)
     assert np.isclose(target.col_spacing, 0.06)
+
+
+def test_warn_rectangular_squares():
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        CheckerboardTarget((8, 5), 0.1, 0.2)
+        assert len(caught_warnings) == 1
 
 
 def test_target_circlegrid():

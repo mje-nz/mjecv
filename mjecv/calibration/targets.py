@@ -1,4 +1,5 @@
 import enum
+import warnings
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
@@ -46,6 +47,11 @@ class CalibrationTarget:
     def __init_subclass__(cls, type_: CalibrationTargetType):
         """Register subclasses when they're declared."""
         cls._types[type_] = cls
+
+    def __attrs_post_init__(self):
+        if self.row_spacing != self.col_spacing:
+            w, h = self.col_spacing, self.row_spacing
+            warnings.warn(f"Are you sure you have rectangular ({w}x{h}) squares?")
 
     @property
     def shape(self):
