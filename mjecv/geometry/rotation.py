@@ -2,23 +2,13 @@ import cv2
 import numpy as np
 import transforms3d
 
+from ..util import as_float
+
 __all__ = [
-    "as_float",
-    "validate_rotation_matrix",
+    "quaternion_to_euler",
     "rotation_matrix_to_quaternion",
     "rotation_vector_to_quaternion",
 ]
-
-
-def as_float(value):
-    """Convert an iterable to an `np.array`, ensuring it has a floating point dtype."""
-    v = np.array(value)
-    if v.dtype not in (np.float16, np.float32, np.float64):
-        try:
-            v = v.astype(np.float64)
-        except TypeError as e:
-            raise ValueError("Invalid floating-point array {}".format(value)) from e
-    return v
 
 
 def validate_rotation_matrix(value):
