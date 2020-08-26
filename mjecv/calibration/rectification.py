@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from attr import attrib, attrs
 
+from ..util import as_float
 from .intrinsics import CameraIntrinsics, CameraModel, DistortionModel
 
 __all__ = [
@@ -163,9 +164,30 @@ class OpenCvUndistorterFisheye(OpenCvUndistorter):
         )
 
 
+def _project_points_radtan(points, rvec, tvec, intrinsic_matrix, distortion_coeffs):
+    # TODO: use Pose
+    points = as_float(points)
+    rvec = as_float(rvec)
+    tvec = as_float(tvec)
+    intrinsic_matrix = as_float(intrinsic_matrix)
+    if distortion_coeffs is not None:
+        distortion_coeffs = as_float(distortion_coeffs)
+    assert 1 <= points.ndim <= 3
+    assert points.shape[-1] == 3
+    projection, _ = cv2.projectPoints(
+        points, rvec, tvec, intrinsic_matrix, distortion_coeffs
+    )
+    # Match original shape, dropping z-coord
+    new_shape = (*points.shape[:-1], points.shape[-1] - 1)
+    return projection.reshape(new_shape)
+
+
 class PinholeNoneIntrinsics(
     CameraIntrinsics, model=CameraModel.Pinhole, distortion_model=DistortionModel.None_
 ):
+
+    # TODO: subclass PinholeRadTan?
+
     def __init__(
         self, intrinsics, distortion_coeffs=None, width=None, height=None, shape=None
     ):
@@ -174,6 +196,10 @@ class PinholeNoneIntrinsics(
         super().__init__(
             CameraModel.Pinhole, intrinsics, DistortionModel.None_, [], width, height,
         )
+
+    def project_points(self, points, rvec, tvec):
+        # TODO: use Pose
+        return _project_points_radtan(points, rvec, tvec, self.intrinsic_matrix, None)
 
 
 class PinholeRadTanIntrinsics(
@@ -201,6 +227,12 @@ class PinholeRadTanIntrinsics(
             self.height,
             *args,
             **kwargs
+        )
+
+    def project_points(self, points, rvec, tvec):
+        # TODO: use Pose
+        return _project_points_radtan(
+            points, rvec, tvec, self.intrinsic_matrix, self.distortion_coeffs
         )
 
 

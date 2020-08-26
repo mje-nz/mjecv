@@ -1,0 +1,45 @@
+import numpy as np
+
+from mjecv.calibration import CameraIntrinsics, ImageExtent, PinholeRadTanIntrinsics
+from mjecv.io import imread
+
+
+def test_undistort_static_radtan():
+    image = imread("data/static-cam0-98.png")
+    expected = imread("data/static-cam0-98-undistorted-radtan.png")
+    cam = CameraIntrinsics.from_kalibr_yaml("data/camchain-static-radtan.yaml", "cam0")
+    actual = cam.get_undistorter(extent=ImageExtent.OnlyValid).undistort_image(image)
+    assert np.allclose(actual, expected)
+
+
+def test_undistort_static_fisheye():
+    image = imread("data/static-cam0-98.png")
+    expected = imread("data/static-cam0-98-undistorted-equi.png")
+    cam = CameraIntrinsics.from_kalibr_yaml("data/camchain-static-equi.yaml", "cam0")
+    actual = cam.get_undistorter(extent=ImageExtent.OnlyValid).undistort_image(image)
+    assert np.allclose(actual, expected)
+
+
+def test_pinhole_radtan_project():
+    cam = PinholeRadTanIntrinsics((10, 10, 100, 100), (0, 0, 0, 0), 200, 200)
+    # Basic
+    assert np.all(cam.project_points((0, 0, 0), (0, 0, 0), (0, 0, 0)) == (100, 100))
+    # Different shapes
+    assert np.all(cam.project_points([[0, 0, 0]], (0, 0, 0), (0, 0, 0)) == [[100, 100]])
+    assert np.all(
+        cam.project_points([[[0, 0, 0]]], (0, 0, 0), (0, 0, 0)) == [[[100, 100]]]
+    )
+    # Different dtypes
+    assert np.all(
+        cam.project_points(np.array([0, 0, 0], dtype=np.float32), (0, 0, 0), (0, 0, 0))
+        == (100, 100)
+    )
+    assert np.all(
+        cam.project_points(np.array([0, 0, 0], dtype=np.uint64), (0, 0, 0), (0, 0, 0))
+        == (100, 100)
+    )
+    # Another point
+    assert np.all(cam.project_points((1, 2, 0), (0, 0, 0), (0, 0, 1)) == (110, 120))
+
+
+# TODO: more tests

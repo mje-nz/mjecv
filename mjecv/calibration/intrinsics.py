@@ -88,7 +88,8 @@ class CameraIntrinsics:
     def undistort_image(self, image: np.ndarray, *args, **kwargs):
         return self.get_undistorter(*args, **kwargs).undistort_image(image)
 
-    # TODO: project points
+    def project_points(self, points, rvec, tvec):
+        raise NotImplementedError()
 
     @classmethod
     def from_kalibr_yaml(cls, file, camera_name: str = None):
