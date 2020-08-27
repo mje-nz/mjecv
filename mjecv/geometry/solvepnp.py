@@ -95,7 +95,7 @@ def solve_pnp(
     """
     require(np.all(image_points > 0), "Image points must be within image bounds")
     if shape:
-        require(image_points < shape)
+        require(np.all(image_points < shape))
 
     rvecs, tvecs, reprojection_errors = _solve_pnp_generic(
         object_points,

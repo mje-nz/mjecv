@@ -93,6 +93,9 @@ class CameraIntrinsics:
     def project_points(self, points, rvec, tvec):
         raise NotImplementedError()
 
+    def solve_pnp(self, object_points, image_points, prior=None, tol=None):
+        raise NotImplementedError()
+
     @classmethod
     def from_kalibr_yaml(cls, file, camera_name: str = None):
         """Load camera intrinsics from a Kalibr camchain yaml file.

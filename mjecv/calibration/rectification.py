@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from attr import attrib, attrs
 
+from ..geometry import solve_pnp
 from ..util import as_float, require
 from .intrinsics import CameraIntrinsics, CameraModel, DistortionModel
 
@@ -186,7 +187,7 @@ class PinholeNoneIntrinsics(
     CameraIntrinsics, model=CameraModel.Pinhole, distortion_model=DistortionModel.None_
 ):
 
-    # TODO: subclass PinholeRadTan?
+    # TODO: subclass PinholeRadTan
 
     def __init__(
         self, intrinsics, distortion_coeffs=None, width=None, height=None, shape=None
@@ -209,6 +210,17 @@ class PinholeNoneIntrinsics(
     def project_points(self, points, rvec, tvec):
         # TODO: use Pose
         return _project_points_radtan(points, rvec, tvec, self.intrinsic_matrix, None)
+
+    def solve_pnp(self, object_points, image_points, prior=None, tol=None):
+        return solve_pnp(
+            object_points,
+            image_points,
+            self.intrinsic_matrix,
+            self.distortion_coeffs,
+            prior,
+            tol,
+            self.shape,
+        )
 
 
 class PinholeRadTanIntrinsics(
@@ -242,6 +254,17 @@ class PinholeRadTanIntrinsics(
         # TODO: use Pose
         return _project_points_radtan(
             points, rvec, tvec, self.intrinsic_matrix, self.distortion_coeffs
+        )
+
+    def solve_pnp(self, object_points, image_points, prior=None, tol=None):
+        return solve_pnp(
+            object_points,
+            image_points,
+            self.intrinsic_matrix,
+            self.distortion_coeffs,
+            prior,
+            tol,
+            self.shape,
         )
 
 

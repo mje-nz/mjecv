@@ -50,9 +50,7 @@ def test_solve_pnp_pinhole(cam, expected_rvec, expected_tvec):
     points = np.c_[np.random.uniform(-2, 2, (8, 2)), np.ones((8, 1))]
     image_points = cam.project_points(points, expected_rvec, expected_tvec)
 
-    rvec, tvec = solve_pnp(
-        points, image_points, cam.intrinsic_matrix, cam.distortion_coeffs, tol=0.1
-    )
+    rvec, tvec = cam.solve_pnp(points, image_points, tol=0.1)
     assert np.allclose(rvec, expected_rvec, atol=1e-6)
     assert np.allclose(tvec, expected_tvec, atol=1e-6)
 
@@ -64,9 +62,7 @@ def test_solvepnp_checkerboard(expected_rvec, expected_tvec):
     image_points = cam.project_points(
         target.object_points, expected_rvec, expected_tvec
     )
-    rvec, tvec = solve_pnp(
-        target.object_points, image_points, cam.intrinsic_matrix, tol=0.1
-    )
+    rvec, tvec = cam.solve_pnp(target.object_points, image_points, tol=0.1)
     assert np.allclose(rvec, expected_rvec, atol=1e-10)
     assert np.allclose(tvec, expected_tvec, atol=1e-10)
 
@@ -88,13 +84,7 @@ def test_solvepnp_checkerboard_cm3(expected_rvec, expected_tvec):
         target.object_points, expected_rvec, expected_tvec
     )
 
-    rvec, tvec = solve_pnp(
-        target.object_points,
-        image_points,
-        cam.intrinsic_matrix,
-        cam.distortion_coeffs,
-        tol=0.1,
-    )
+    rvec, tvec = cam.solve_pnp(target.object_points, image_points, tol=0.1,)
     assert np.allclose(rvec, expected_rvec, atol=1e-9)
     assert np.allclose(tvec, expected_tvec, atol=1e-9)
 
@@ -110,10 +100,6 @@ def test_solvepnp_bad_points(bad_point):
     image_points = cam.project_points(target.object_points, (0, 0, 0), (0, 0, 0))
     image_points[0] = bad_point
     with pytest.raises(ValueError):
-        solve_pnp(
-            target.object_points,
-            image_points,
-            cam.intrinsic_matrix,
-            cam.distortion_coeffs,
-            shape=cam.shape,
+        cam.solve_pnp(
+            target.object_points, image_points,
         )
