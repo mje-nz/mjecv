@@ -24,9 +24,11 @@ def solve_pnp(
     Returns: rotation vector, (x, y, z) translation in metres
     """
     # Check arguments
+    assert object_points is not None
     if object_points.shape[1] != 3:
         assert object_points.shape[0] == 3, "Object points must be 3xN or Nx3"
         object_points = object_points.transpose()
+    assert image_points is not None
     if image_points.shape[1] != 2:
         assert image_points.shape[0] == 2, "Image points must be 2xN or Nx2"
         image_points = image_points.transpose()
