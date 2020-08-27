@@ -5,6 +5,8 @@ import numpy as np
 import yaml
 from attr import attrs
 
+from ..util import ensure_open
+
 __all__ = ["CameraIntrinsics", "CameraModel", "DistortionModel"]
 
 
@@ -97,17 +99,14 @@ class CameraIntrinsics:
         raise NotImplementedError()
 
     @classmethod
-    def from_kalibr_yaml(cls, file, camera_name: str = None):
+    def from_kalibr_yaml(cls, file_or_str, camera_name: str = None):
         """Load camera intrinsics from a Kalibr camchain yaml file.
 
         Args:
-            file: Filename or string of yaml file to load.
+            file_or_str: Filename or string of yaml file to load.
             camera_name: Name of camera to load intrinsics for (optional if only one).
         """
-        if not hasattr(file, "read") and ":" not in file:
-            # `file` is probably a filename
-            file = open(file)
-        camchain = yaml.load(file, Loader=yaml.SafeLoader)
+        camchain = yaml.load(ensure_open(file_or_str), Loader=yaml.SafeLoader)
         assert len(camchain) >= 1
         if not camera_name:
             if len(camchain) > 1:

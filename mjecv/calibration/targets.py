@@ -6,6 +6,7 @@ import numpy as np
 import yaml
 from attr import attrs
 
+from ..util import ensure_open
 from .intrinsics import CameraIntrinsics
 
 __all__ = [
@@ -78,13 +79,13 @@ class CalibrationTarget:
         raise NotImplementedError()
 
     @classmethod
-    def from_kalibr_yaml(cls, file) -> "CalibrationTarget":
+    def from_kalibr_yaml(cls, file_or_str) -> "CalibrationTarget":
         """Load calibration target configuration from a Kalibr target yaml file.
 
         Args:
-            file: Filename or string of yaml file to load.
+            file_or_str: Filename or string of yaml file to load.
         """
-        target_yaml = yaml.load(file, Loader=yaml.SafeLoader)
+        target_yaml = yaml.load(ensure_open(file_or_str), Loader=yaml.SafeLoader)
         target_type = CalibrationTargetType(target_yaml["target_type"])
         return cls._types[target_type]._from_kalibr_yaml(target_yaml)
 
