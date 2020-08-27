@@ -69,7 +69,7 @@ def draw_text(
     font_type: str = "sans",
     scale: float = 1,
     align: str = "lower left",
-    image_origin_at_bottom=True,
+    image_origin_at_bottom=False,
 ):
     """Draw text onto an image.
 
