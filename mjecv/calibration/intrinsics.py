@@ -98,8 +98,8 @@ class CameraIntrinsics:
             file: Filename or string of yaml file to load.
             camera_name: Name of camera to load intrinsics for (optional if only one).
         """
-        if ":" not in file:
-            # File is a filename
+        if not hasattr(file, "read") and ":" not in file:
+            # `file` is probably a filename
             file = open(file)
         camchain = yaml.load(file, Loader=yaml.SafeLoader)
         assert len(camchain) >= 1
