@@ -16,3 +16,12 @@ def as_float(arr):
         except TypeError as e:
             raise ValueError("Invalid floating-point array {}".format(arr)) from e
     return arr
+
+
+def require(condition, message=""):
+    """Assert-like syntax for raising exceptions which doesn't optimise out."""
+    if not condition:
+        if type(message) is str:
+            raise ValueError(message)
+        else:
+            raise message

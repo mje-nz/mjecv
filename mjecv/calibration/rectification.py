@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from attr import attrib, attrs
 
-from ..util import as_float
+from ..util import as_float, require
 from .intrinsics import CameraIntrinsics, CameraModel, DistortionModel
 
 __all__ = [
@@ -191,6 +191,15 @@ class PinholeNoneIntrinsics(
     def __init__(
         self, intrinsics, distortion_coeffs=None, width=None, height=None, shape=None
     ):
+        """Construct camera intrinsics with pinhole model and no distortion.
+
+        N.B. This has to have the same signature as the others, so it does take a
+        distortion_coeffs parameter.
+        """
+        require(
+            distortion_coeffs is None or len(distortion_coeffs) == 0,
+            "Distortion coefficients must be null",
+        )
         if width is None:
             height, width = shape[:2]
         super().__init__(

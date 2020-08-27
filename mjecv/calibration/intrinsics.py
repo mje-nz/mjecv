@@ -61,6 +61,8 @@ class CameraIntrinsics:
     intrinsics: np.ndarray
     distortion_model: DistortionModel
     distortion_coeffs: np.ndarray
+    # TODO: take shape instead of width, height
+    # TODO: reorder so subclasses have simpler __init__s
     width: int
     height: int
 
