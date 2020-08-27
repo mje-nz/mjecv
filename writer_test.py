@@ -1,6 +1,6 @@
 import numpy as np
 
-from mjecv.io import imwrite, ParallelImageSequenceWriter
+from mjecv.io import ParallelImageSequenceWriter, imwrite
 
 if __name__ == "__main__":
     size = 2000

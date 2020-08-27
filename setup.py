@@ -35,5 +35,5 @@ setuptools.setup(
     ],
     python_requires=">=3.6",
     install_requires=["numpy>=1.18,<2", "packaging>=20.4"],
-    extras_require=extras_require
+    extras_require=extras_require,
 )
