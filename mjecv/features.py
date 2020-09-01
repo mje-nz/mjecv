@@ -15,7 +15,7 @@ def refine_subpixel(
     """Refine the locations of corners or radial saddle points with sub-pixel accuracy.
 
     Args:
-        image: single-channel 8-bit or float image.
+        image: single-channel 8-bit integer or 32-bit float image.
         corners: Nx2 array of approximate corner locations.
         window_size: The width and height of the area to search around each location.
         zero_size: The width and height of the area to skip in the middle of the search
@@ -28,6 +28,8 @@ def refine_subpixel(
         Nx2 array of refined corner locations.
     """
     # TODO: check precisely what impl does with window size and zero zone
+    # TODO: convert image to np.float32 if not 8U or 32F
+    # TODO: convert image to grayscale if necessary
     win_size = (window_size - 1) // 2
     if zero_size:
         zero_zone = (zero_size - 1) // 2

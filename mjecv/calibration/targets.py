@@ -62,7 +62,7 @@ class CalibrationTarget:
     def object_points(self):
         raise NotImplementedError()
 
-    def detect(self, image: np.ndarray, refine=True):
+    def detect(self, image: np.ndarray, refine=True, tolerance=1e-3):
         """Detect the target in an image.
 
         Returns:
