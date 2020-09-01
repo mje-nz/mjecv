@@ -42,6 +42,13 @@ def ensure_open(obj, mode="r", accept_string=True):
     return obj
 
 
+def free_space(path):
+    """Return free space in bytes on the partition containing `path`."""
+    # https://stackoverflow.com/a/7285483
+    stat = os.statvfs(path)
+    return stat.f_bavail * stat.f_frsize
+
+
 def require(condition, message=""):
     """Assert-like syntax for raising exceptions which doesn't optimise out."""
     if not condition:
