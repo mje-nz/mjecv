@@ -8,6 +8,8 @@ __all__ = [
     "quaternion_to_euler",
     "rotation_matrix_to_quaternion",
     "rotation_vector_to_quaternion",
+    "quaternion_to_rotation_matrix",
+    "quaternion_to_rotation_vector",
 ]
 
 
@@ -42,3 +44,12 @@ def quaternion_to_euler(quat):
     # TODO: document
     # TODO: rotation sequences
     return transforms3d.euler.quat2euler(quat)
+
+
+quaternion_to_rotation_matrix = transforms3d.quaternions.quat2mat
+
+
+def quaternion_to_rotation_vector(quaternion):
+    rotation_matrix = quaternion_to_rotation_matrix(quaternion)
+    rotation_vector, _ = cv2.Rodrigues(rotation_matrix)
+    return validate_rotation_vector(rotation_vector)
