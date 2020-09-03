@@ -18,15 +18,15 @@ def test_Point2_copy():
 
 def test_Point2_create_invalid():
     with pytest.raises(ValueError):
-        Point2()
+        Point2()  # type: ignore
     with pytest.raises(ValueError):
-        Point2(1)
+        Point2(1)  # type: ignore
     with pytest.raises(ValueError):
-        Point2([1])
+        Point2([1])  # type: ignore
     with pytest.raises(ValueError):
-        Point2(1, 2, 3)
+        Point2(1, 2, 3)  # type: ignore
     with pytest.raises(ValueError):
-        Point2([1, 2, 3])
+        Point2([1, 2, 3])  # type: ignore
 
 
 def test_Point2_repr():

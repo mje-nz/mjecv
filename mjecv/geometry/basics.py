@@ -1,3 +1,5 @@
+from typing import Tuple, Union, overload
+
 import numpy as np
 
 __all__ = ["Point2", "Size", "Rect"]
@@ -75,14 +77,31 @@ class _Vector:
     # TODO: iterable, norm
 
 
+Point2Like = Union["Point2", np.ndarray, Tuple[float, float]]
+
+
 class Point2(_Vector):
     """2D point class modelled on OpenCV's Point2"""
 
     _length = 2
     _aliases = ("x", "y")
 
+    @overload
+    def __init__(self, vector: Point2Like):
+        pass
+
+    @overload
+    def __init__(self, x: float, y: float):
+        pass
+
+    def __init__(self, *args):
+        super().__init__(*args)
+
     def __str__(self):
         return str(tuple(self._value))
+
+
+SizeLike = Union["Size", np.ndarray, Tuple[float, float]]
 
 
 class Size(_Vector):
@@ -90,12 +109,31 @@ class Size(_Vector):
     _length = 2
     _aliases = ("width", "height")
 
+    @overload
+    def __init__(self, vector: SizeLike):
+        pass
+
+    @overload
+    def __init__(self, width: float, height: float):
+        pass
+
+    def __init__(self, *args):
+        super().__init__(*args)
+
     # TODO: area
 
 
 class Rect:
 
     _aliases = ("x", "y", "width", "height")
+
+    @overload
+    def __init__(self, origin: Point2Like, size: SizeLike):
+        pass
+
+    @overload
+    def __init__(self, x: float, y: float, width: float, height: float):
+        pass
 
     def __init__(self, *args):
         if len(args) == 2:
