@@ -1,7 +1,11 @@
 import numpy as np
 import yaml
 
-from mjecv.calibration import CheckerboardTarget, find_checkerboard_corners
+from mjecv.calibration import (
+    CheckerboardTarget,
+    draw_checkerboard,
+    find_checkerboard_corners,
+)
 from mjecv.io import imread
 
 
@@ -42,3 +46,39 @@ def test_CheckerboardTarget_object_points():
         (0.2, 0.05, 0),
     ]
     assert np.allclose(target.object_points, expected)
+
+
+def test_draw_checkerboard():
+    target = CheckerboardTarget((3, 2), 1)
+    im = draw_checkerboard(target)
+    # fmt: off
+    expected = np.array([
+        [1, 1, 1, 1, 1],
+        [1, 0, 1, 0, 1],
+        [1, 1, 0, 1, 1],
+        [1, 1, 1, 1, 1],
+    ]) * 255
+    # fmt: on
+    assert np.all(im == expected)
+
+
+def test_draw_checkerboard_bg():
+    target = CheckerboardTarget((3, 2), 2)
+    im = draw_checkerboard(target, background=2, background_colour=100)
+    expected = np.array(
+        [
+            [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+            [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+            [100, 100, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 100, 100],
+            [100, 100, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 100, 100],
+            [100, 100, 255, 255, 000, 000, 255, 255, 000, 000, 255, 255, 100, 100],
+            [100, 100, 255, 255, 000, 000, 255, 255, 000, 000, 255, 255, 100, 100],
+            [100, 100, 255, 255, 255, 255, 000, 000, 255, 255, 255, 255, 100, 100],
+            [100, 100, 255, 255, 255, 255, 000, 000, 255, 255, 255, 255, 100, 100],
+            [100, 100, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 100, 100],
+            [100, 100, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 100, 100],
+            [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+            [100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+        ]
+    )
+    assert np.all(im == expected)

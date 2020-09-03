@@ -5,7 +5,11 @@ from ..features import refine_subpixel
 from .intrinsics import CameraIntrinsics
 from .targets import CalibrationTarget, CalibrationTargetType
 
-__all__ = ["CheckerboardTarget", "find_checkerboard_corners"]
+__all__ = [
+    "CheckerboardTarget",
+    "draw_checkerboard",
+    "find_checkerboard_corners",
+]
 
 
 def find_checkerboard_corners(
@@ -96,3 +100,44 @@ class CheckerboardTarget(CalibrationTarget, type_=CalibrationTargetType.Checkerb
         row_spacing = float(target_yaml["rowSpacingMeters"])
         col_spacing = float(target_yaml["colSpacingMeters"])
         return cls((cols, rows), row_spacing, col_spacing)
+
+
+def draw_checkerboard(
+    target: CheckerboardTarget, border: float = 1, background=0, background_colour=128,
+):
+    """Draw a 2D checkerboard.
+
+    Args:
+        target: Target to draw; sizes interpreted in pixels.
+        border: Width of white border as a factor of square size.
+        background: Width of background around each edge in pixels.
+        background_colour: Background colour.
+
+    Returns:
+        np.ndarray: single-channel uint8 image
+    """
+    assert target.row_spacing is not None
+    assert target.col_spacing is not None
+    h = int(target.row_spacing)
+    w = int(target.col_spacing)
+    height = int(h * (target.rows + 2 * border) + 2 * background)
+    width = int(w * (target.cols + 2 * border) + 2 * background)
+
+    im = np.ones((height, width), dtype=np.uint8)
+    if background:
+        # Start with image full of background colour
+        im *= background_colour
+
+        # Fill checkerboard area with white
+        im[background:-background, background:-background] = 255
+    else:
+        # Start with image full of white
+        im *= 255
+
+    # Draw black squares
+    for i in range(target.rows):
+        y = int(background + (i + border) * h)
+        for j in range(i % 2, target.cols, 2):
+            x = int(background + (j + border) * w)
+            im[y : y + h, x : x + w] = 0
+    return im
