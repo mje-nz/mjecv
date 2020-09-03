@@ -146,6 +146,9 @@ class Rect:
         else:
             raise ValueError(f"{args} is not a valid rect")
 
+    def __repr__(self):
+        return f"Rect({self.origin!r}, {self.size!r})"
+
     def __getitem__(self, index):
         if index in (0, 1):
             return self.origin[index]
@@ -176,5 +179,21 @@ class Rect:
         return (self.x <= point.x <= self.x + self.width) and (
             self.y <= point.y <= self.y + self.height
         )
+
+    @property
+    def x_min(self):
+        return self.x
+
+    @property
+    def x_max(self):
+        return self.x + self.width
+
+    @property
+    def y_min(self):
+        return self.y
+
+    @property
+    def y_max(self):
+        return self.y + self.height
 
     # TODO: area, topleft, bottomright, iterable

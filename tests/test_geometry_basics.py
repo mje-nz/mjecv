@@ -139,6 +139,19 @@ def test_Rect_create():
     assert rect == Rect((1, 2), (3, 4))
 
 
+def test_Rect_repr():
+    rect = Rect(1, 2, 3, 4)
+    assert repr(rect) == "Rect(Point2(1, 2), Size(3, 4))"
+
+
+def test_Rect_properties():
+    rect = Rect(1, 2, 3, 4)
+    assert rect.x_min == 1
+    assert rect.y_min == 2
+    assert rect.x_max == 4
+    assert rect.y_max == 6
+
+
 @pytest.mark.parametrize(
     "pt",
     (
