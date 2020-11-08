@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 from attr import attrs
 
-from ..util import ensure_open
+from ..util import ensure_open, require
 
 __all__ = ["CameraIntrinsics", "CameraModel", "DistortionModel"]
 
@@ -107,12 +107,13 @@ class CameraIntrinsics:
             camera_name: Name of camera to load intrinsics for (optional if only one).
         """
         camchain = yaml.load(ensure_open(file_or_str), Loader=yaml.SafeLoader)
-        assert len(camchain) >= 1
+        require(camchain is not None, "No calibration YAML provided")
+        require(len(camchain) >= 1, "Calibration YAML must not be empty")
         if not camera_name:
-            if len(camchain) > 1:
-                raise ValueError(
-                    "Multiple cameras in camchain and no camera name specified"
-                )
+            require(
+                len(camchain) == 1,
+                "Multiple cameras in camchain and no camera name specified"
+            )
             camera_name = list(camchain.keys())[0]
         cam = camchain[camera_name]
         model = CameraModel(cam["camera_model"])

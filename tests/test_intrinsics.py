@@ -41,6 +41,19 @@ cam1:
 """
 
 
+def test_load_empty_stirng():
+    with pytest.raises(ValueError):
+        CameraIntrinsics.from_kalibr_yaml("")
+
+
+@pytest.mark.parametrize("content", ("", "\n"))
+def test_load_empty_file(tmp_path, content):
+    file = tmp_path / "temp"
+    file.write_text(content)
+    with pytest.raises(ValueError):
+        CameraIntrinsics.from_kalibr_yaml(file)
+
+
 def _check_cam0(cam: CameraIntrinsics):
     """Check intrinsics match cam0 from the example."""
     assert cam.model == CameraModel.Pinhole
