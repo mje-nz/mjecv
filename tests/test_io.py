@@ -1,10 +1,12 @@
+from pathlib import Path
+
 import pytest
 
 from mjecv.io import imread
 
 
 def test_imread():
-    image = imread("data/chess1.png")
+    image = imread(Path(__file__).parent / "data/chess1.png")
     assert image.shape == (240, 320)
 
 

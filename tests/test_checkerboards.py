@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import yaml
 
@@ -11,8 +13,9 @@ from mjecv.io import imread
 
 def load_chess1():
     """Load OpenCV test data."""
-    image = imread("data/chess1.png")
-    corners = yaml.load(open("data/chess_corners1.dat"), Loader=yaml.SafeLoader)[
+    data_dir = Path(__file__).parent / "data"
+    image = imread(data_dir / "chess1.png")
+    corners = yaml.load(open(data_dir / "chess_corners1.dat"), Loader=yaml.SafeLoader)[
         "corners"
     ]
     shape = (corners["cols"], corners["rows"])
