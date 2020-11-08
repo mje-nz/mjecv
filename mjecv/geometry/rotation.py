@@ -1,3 +1,4 @@
+# https://github.com/mje-nz/mjemarker/blob/master/mjemarker/geometry.py
 import cv2
 import numpy as np
 import transforms3d
@@ -7,7 +8,9 @@ from ..util import as_float
 __all__ = [
     "quaternion_to_euler",
     "rotation_matrix_to_quaternion",
+    "rotation_matrix_to_vector",
     "rotation_vector_to_quaternion",
+    "rotation_vector_to_matrix",
     "quaternion_to_rotation_matrix",
     "quaternion_to_rotation_vector",
 ]
@@ -35,9 +38,18 @@ def validate_rotation_vector(value):
     return v
 
 
-def rotation_vector_to_quaternion(vec):
+def rotation_vector_to_matrix(vec):
     rotation_matrix, _ = cv2.Rodrigues(validate_rotation_vector(vec))
-    return rotation_matrix_to_quaternion(rotation_matrix)
+    return rotation_matrix
+
+
+def rotation_matrix_to_vector(mat):
+    rotation_vector, _ = cv2.Rodrigues(validate_rotation_matrix(mat))
+    return rotation_vector
+
+
+def rotation_vector_to_quaternion(vec):
+    return rotation_matrix_to_quaternion(rotation_vector_to_matrix(vec))
 
 
 def quaternion_to_euler(quat):
