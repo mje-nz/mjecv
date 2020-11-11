@@ -168,6 +168,9 @@ class OpenCvUndistorterFisheye(OpenCvUndistorter):
 def _project_points_radtan(points, rvec, tvec, intrinsic_matrix, distortion_coeffs):
     # TODO: use Pose
     points = as_float(points)
+    # TODO: catch hard crash on wrong shape e.g.
+    #       cv2.projectPoints(np.zeros((10, 3)), np.zeros((3, 4)), np.zeros((3, 4)),
+    #       np.zeros((3, 3)), np.zeros((4)))
     rvec = as_float(rvec)
     tvec = as_float(tvec)
     intrinsic_matrix = as_float(intrinsic_matrix)

@@ -27,6 +27,7 @@ def refine_subpixel(
     Returns:
         Nx2 array of refined corner locations.
     """
+    # TODO: don't modify input!!
     # TODO: check precisely what impl does with window size and zero zone
     # TODO: convert image to np.float32 if not 8U or 32F
     # TODO: convert image to grayscale if necessary
@@ -47,5 +48,6 @@ def refine_subpixel(
             image, corners, (win_size, win_size), (zero_zone, zero_zone), criteria
         )
     )
+    # TODO: reshape instead of squeeze
     assert corners_refined.shape == corners.shape
     return corners_refined

@@ -17,6 +17,7 @@ def imread(filename):
 
 
 def imwrite(filename, image: np.ndarray):
+    # TODO: create parent folder
     success = cv2.imwrite(str(filename), image)
     if not success:
         message = f'Could not write "{filename}"'

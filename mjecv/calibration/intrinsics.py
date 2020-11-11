@@ -60,6 +60,7 @@ class DistortionModel(enum.Enum):
 @attrs(auto_attribs=True)
 class CameraIntrinsics:
     model: CameraModel
+    # TODO: convert arrays
     intrinsics: np.ndarray
     distortion_model: DistortionModel
     distortion_coeffs: np.ndarray
@@ -78,6 +79,9 @@ class CameraIntrinsics:
     @property
     def shape(self):
         return self.height, self.width
+
+    # TODO: focal_length property
+    # TODO: principal_point property
 
     @property
     def intrinsic_matrix(self):
@@ -112,7 +116,7 @@ class CameraIntrinsics:
         if not camera_name:
             require(
                 len(camchain) == 1,
-                "Multiple cameras in camchain and no camera name specified"
+                "Multiple cameras in camchain and no camera name specified",
             )
             camera_name = list(camchain.keys())[0]
         cam = camchain[camera_name]
